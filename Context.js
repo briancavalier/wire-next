@@ -17,6 +17,8 @@ Context.prototype = {
 		}
 
 		this._components[name] = component;
+
+		return this;
 	},
 
 	get: function(name) {
