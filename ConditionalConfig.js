@@ -1,7 +1,9 @@
-module.exports = function(condition, configs) {
-	return function(context) {
-		var config = condition(configs);
+var dynamicConfig = require('./DynamicConfig');
 
-		return config && config(context);
-	};
+module.exports = conditionalConfig
+
+function conditionalConfig(condition, configs) {
+	return dynamicConfig(function() {
+		return condition(configs);
+	});
 };

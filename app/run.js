@@ -1,5 +1,6 @@
 (function(curl) {
 
+	window.test = true;
 	var config = {
 		packages: {
 			app: { location: 'app', config: { moduleLoader: 'curl/loader/cjsm11' } },

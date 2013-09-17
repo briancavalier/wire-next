@@ -1,22 +1,18 @@
 var Context = require('wire/Context');
 var methodConfig = require('wire/MethodConfig');
-var conditionalConfig = require('wire/ConditionalConfig');
+var dynamicConfig = require('wire/DynamicConfig');
 var Prototype = require('wire/Prototype');
 
 var HelloWire = require('app/HelloWire');
 
-var baseConfig = conditionalConfig(
-	function(configs) {
-		return window.test ? configs.test : configs.prod
-	},
-	{
-		test: methodConfig({
+var baseConfig = dynamicConfig(function() {
+		return window.test
+		? methodConfig({
 			message: 'I iz being tested',
 
 			node: { innerHTML: 'foo' }
-		}),
-
-		prod: methodConfig({
+		})
+		: methodConfig({
 			message: 'I haz been wired',
 
 			node: function() {
