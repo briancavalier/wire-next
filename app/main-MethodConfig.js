@@ -1,22 +1,22 @@
 var Context = require('wire/Context');
-var MethodConfig = require('wire/MethodConfig');
-var ConditionalConfig = require('wire/ConditionalConfig');
+var methodConfig = require('wire/MethodConfig');
+var conditionalConfig = require('wire/ConditionalConfig');
 var Prototype = require('wire/Prototype');
 
 var HelloWire = require('app/HelloWire');
 
-var baseConfig = new ConditionalConfig(
+var baseConfig = conditionalConfig(
 	function(configs) {
 		return window.test ? configs.test : configs.prod
 	},
 	{
-		test: new MethodConfig({
+		test: methodConfig({
 			message: 'I iz being tested',
 
 			node: { innerHTML: 'foo' }
 		}),
 
-		prod: new MethodConfig({
+		prod: methodConfig({
 			message: 'I haz been wired',
 
 			node: function() {
@@ -26,15 +26,7 @@ var baseConfig = new ConditionalConfig(
 	}
 );
 
-var appConfig = new MethodConfig({
-//	message: 'I haz been wired',
-//
-//	node: document.querySelector.bind(document, '.hello'),
-//
-//	helloWire: new Prototype(function() {
-//		return new HelloWire(this.node());
-//	})
-
+var appConfig = methodConfig({
 //	helloWire: function(context) {
 //		return new HelloWire(context.get('node'));
 //	}
@@ -43,8 +35,8 @@ var appConfig = new MethodConfig({
 	})
 });
 
-var base = baseConfig.configure(new Context());
+var base = baseConfig(new Context());
 
 //module.exports = appConfig.configure(base);
-module.exports = appConfig.configure(new Context(base));
+module.exports = appConfig(new Context(base));
 //module.exports = appConfig.configure(new Context());

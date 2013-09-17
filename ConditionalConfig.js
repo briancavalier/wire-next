@@ -1,14 +1,7 @@
-module.exports = ConditionalConfig;
+module.exports = function(condition, configs) {
+	return function(context) {
+		var config = condition(configs);
 
-function ConditionalConfig(condition, configs) {
-	this._condition = condition;
-	this._configs = configs;
-}
-
-ConditionalConfig.prototype = {
-	configure: function(context) {
-		var config = this._condition(this._configs);
-
-		return config && config.configure(context);
-	}
-}
+		return config && config(context);
+	};
+};

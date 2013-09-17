@@ -1,17 +1,11 @@
 var Singleton = require('./Singleton');
 var Prototype = require('./Prototype');
 
-module.exports = MethodConfig;
+module.exports = function(object) {
+	return function(context) {
+		var config = Object.create(object);
 
-function MethodConfig(object) {
-	this._config = object;
-}
-
-MethodConfig.prototype = {
-	configure: function(context) {
-		var config = Object.create(this._config);
-
-		return Object.keys(this._config).reduce(function(context, name) {
+		return Object.keys(object).reduce(function(context, name) {
 			var factory = config[name];
 
 			if(factory instanceof Prototype || factory instanceof Singleton) {
@@ -33,7 +27,7 @@ MethodConfig.prototype = {
 
 			return context;
 		}, context);
-	}
+	};
 };
 
 function wrapComponent(component) {
