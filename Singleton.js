@@ -1,3 +1,5 @@
+var undef;
+
 module.exports = Singleton;
 
 function Singleton(factory) {
@@ -5,9 +7,9 @@ function Singleton(factory) {
 }
 
 Singleton.prototype = {
-	instance: function(context) {
+	instance: function() {
 		if(typeof this._factory === 'function') {
-			this._instance = this._factory(context);
+			this._instance = this._factory.apply(undef, arguments);
 			delete this._factory;
 		}
 

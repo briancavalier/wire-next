@@ -1,3 +1,5 @@
+var undef;
+
 module.exports = Prototype;
 
 function Prototype(factory) {
@@ -5,7 +7,7 @@ function Prototype(factory) {
 }
 
 Prototype.prototype = {
-	instance: function(context) {
-		return this._factory(context);
+	instance: function() {
+		return this._factory.apply(undef, arguments);
 	}
 };
