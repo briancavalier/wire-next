@@ -1,18 +1,15 @@
-var undef;
+module.exports = singleton;
 
-module.exports = Singleton;
+var tag = singleton.prototype = require('./config/base');
 
-function Singleton(factory) {
-	this._factory = factory;
-}
+function singleton(factory) {
+	var instance = create.prototype = tag;
 
-Singleton.prototype = {
-	instance: function() {
-		if(typeof this._factory === 'function') {
-			this._instance = this._factory.apply(undef, arguments);
-			delete this._factory;
-		}
+	return create;
 
-		return this._instance;
+	function create() {
+		return instance === tag
+			? (instance = factory.apply(this, arguments))
+			: instance;
 	}
-};
+}

@@ -9,37 +9,45 @@ function Context(parent) {
 }
 
 Context.prototype = {
-	register: function(name, component) {
+	configure: function(config) {
+		return config(this);
+	},
+
+	add: function(name, factory) {
 		var components = this._components;
 
 		if(name in components) {
 			throw new Error('Component named ' + name + ' already registered');
 		}
 
-		this._components[name] = component;
+		components[name] = factory;
 
 		return this;
 	},
 
 	get: function(name) {
+		var requestingContext = arguments[1] instanceof Context ? arguments[1] : this;
 		if(!(name in this._components)) {
-			return this._parent && this._parent.get(name);
+			return this._parent && this._parent.get(name, requestingContext);
 		}
 
-		return this._getInstanceByName(name);
+		return this._getInstanceByName(name, requestingContext);
 	},
 
-	_getInstanceByName: function(name) {
-		var component, instance;
+	_getInstanceByName: function(name, requestingContext) {
+		var factory, instances, instance;
 
-		component = this._components[name];
+		factory = this._components[name];
 
-		if(component) {
-			instance = component.instance(this);
+		if(factory) {
+			instance = factory.call(Object.create(this, {
+				currentContext: { value: requestingContext }
+			}));
+			instances = this._instances;
 
-			if(!this._instances.has(instance)) {
-				this._instances.set(instance, {
-					component: component
+			if(!instances.has(instance)) {
+				instances.set(instance, {
+					component: factory
 				});
 			}
 

@@ -1,13 +1,13 @@
-var undef;
+module.exports = prototype;
 
-module.exports = Prototype;
+prototype.prototype = require('./config/base');
 
-function Prototype(factory) {
-	this._factory = factory;
-}
+function prototype(factory) {
+	instance.prototype = prototype.prototype;
 
-Prototype.prototype = {
-	instance: function() {
-		return this._factory.apply(undef, arguments);
+	return instance;
+
+	function instance() {
+		return factory.apply(this, arguments);
 	}
-};
+}

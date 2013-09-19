@@ -1,6 +1,5 @@
 (function(curl) {
 
-	window.test = true;
 	var config = {
 		packages: {
 			app: { location: 'app', config: { moduleLoader: 'curl/loader/cjsm11' } },
@@ -9,7 +8,7 @@
 		}
 	};
 
-	curl(config, ['app/main-MethodConfig', 'domReady!'], function(context) {
+	curl(config, ['app/main', 'domReady!'], function(context) {
 		context.get('helloWire').sayHello(context.get('message'));
 		context.get('helloWire').sayHello(context.get('message'));
 
