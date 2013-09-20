@@ -1,6 +1,7 @@
 var config = require('./base');
 var singleton = require('../Singleton');
 var prototype = require('../Prototype');
+var slice = Array.prototype.slice;
 
 module.exports = fluentConfig;
 
@@ -14,8 +15,8 @@ function fluentConfig(configure) {
 	configure(config);
 
 	return function(context) {
-		return commands.reduce(function(context, config) {
-			config(context);
+		return commands.reduce(function(context, command) {
+			command(context);
 			return context;
 		}, context);
 	};
@@ -27,7 +28,7 @@ function FluentConfig(commands) {
 
 FluentConfig.prototype = {
 	proto: function(name, deps, factory) {
-		var args = Array.prototype.slice.call(arguments);
+		var args = slice.call(arguments);
 		factory = args[args.length - 1];
 
 		if(factory.prototype !== prototype.prototype) {
@@ -67,11 +68,7 @@ FluentConfig.prototype = {
 
 function createComponent(x) {
 	if(typeof x === 'function') {
-		if(x.prototype === config) {
-			return x;
-		}
-
-		return singleton(x);
+		return x.prototype === config ? x : singleton(x);
 	}
 
 	return singleton(function() {

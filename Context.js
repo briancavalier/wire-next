@@ -40,6 +40,9 @@ Context.prototype = {
 		factory = this._components[name];
 
 		if(factory) {
+			// TODO: Find a better way to provide access to both contexts:
+			// The context that actually contains this instance, and the
+			// context from which the instance was just requested
 			instance = factory.call(Object.create(this, {
 				currentContext: { value: requestingContext }
 			}));
@@ -47,7 +50,7 @@ Context.prototype = {
 
 			if(!instances.has(instance)) {
 				instances.set(instance, {
-					component: factory
+					factory: factory
 				});
 			}
 
