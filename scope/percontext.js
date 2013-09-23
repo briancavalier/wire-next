@@ -1,6 +1,6 @@
-var Map = require('./lib/Map');
+var Map = require('./../lib/Map');
 
-percontext.prototype = require('./config/base');
+percontext.prototype = require('./../config/base');
 
 module.exports = percontext;
 

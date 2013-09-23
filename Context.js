@@ -1,4 +1,5 @@
 var Map = require('./lib/Map');
+var componentId = 0;
 
 module.exports = Context;
 
@@ -13,56 +14,100 @@ Context.prototype = {
 		return config(this);
 	},
 
-	add: function(name, factory) {
-		var components = this._components;
+	add: function(scope, metadata, create) {
+		var id, components, component;
 
-		if(name in components) {
-			throw new Error('Component named ' + name + ' already registered');
+		metadata = normalizeMetadata(metadata);
+		id = metadata.id;
+
+		component = { id: id, create: scope(create), metadata: metadata };
+
+		components = this._components;
+		if (id in components) {
+			throw new Error('Component named ' + id + ' already registered');
 		}
 
-		components[name] = factory;
+		components[id] = component;
 
 		return this;
 	},
 
-	get: function(name) {
-		var requestingContext = arguments[1] instanceof Context ? arguments[1] : this;
-		if(!(name in this._components)) {
-			return this._parent && this._parent.get(name, requestingContext);
+	get: function(query) {
+		var component, requestingContext;
+
+		if(typeof query !== 'function') {
+			query = byId(query);
 		}
 
-		return this._getInstanceByName(name, requestingContext);
+		requestingContext = arguments[1] instanceof Context ? arguments[1] : this;
+		component = query(this._components);
+
+		if(!component) {
+			return this._parent && this._parent.get(query, requestingContext);
+		}
+
+		// TODO: Find a better way to provide access to both contexts:
+		// The context that actually contains this instance, and the
+		// context from which the instance was just requested
+		return this.createInstance(component, Object.create(this, {
+			currentContext: { value: requestingContext }
+		}));
 	},
 
-	_getInstanceByName: function(name, requestingContext) {
-		var factory, instances, instance;
+	createInstance: function(component, context) {
+		var instances, instance;
 
-		factory = this._components[name];
+		instances = this._instances;
+		instance = component.create.call(context);
 
-		if(factory) {
-			// TODO: Find a better way to provide access to both contexts:
-			// The context that actually contains this instance, and the
-			// context from which the instance was just requested
-			instance = factory.call(Object.create(this, {
-				currentContext: { value: requestingContext }
-			}));
-			instances = this._instances;
+		instances.set(instance, component);
 
-			if(!instances.has(instance)) {
-				instances.set(instance, {
-					factory: factory
-				});
-			}
+		return instance;
+	},
 
-			return instance;
-		}
+	destroyInstance: function(instance) {
+		this._instances.delete(instance);
 	},
 
 	destroy: function() {
-		// TODO:
-		// 1. destroy all instances
-		// 2. clear this._instances
-		// 3. clear this._components
-		// 4. make destroy() a noop
+		if(!this._instances) {
+			return;
+		}
+
+		var instances, self;
+
+		self = this;
+		instances = this._instances;
+
+		instances.keys().forEach(function(instance) {
+			self.destroyInstance(instance);
+		});
+
+		instances.clear();
+
+		delete this._instances;
+		delete this._components;
 	}
 };
+
+function byId(id) {
+	return function(components) {
+		return components[id];
+	}
+}
+
+function normalizeMetadata(metadata) {
+	if (typeof metadata === 'string') {
+		return { id: ensureId(metadata) };
+	}
+
+	metadata.id = ensureId(metadata.id);
+
+	return metadata;
+}
+
+function ensureId(id) {
+	return typeof id !== 'string' || id.length === 0
+		? '!' + Date.now() + (componentId++)
+		: id;
+}

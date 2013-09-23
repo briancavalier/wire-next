@@ -1,6 +1,6 @@
 module.exports = singleton;
 
-var tag = singleton.prototype = require('./config/base');
+var tag = singleton.prototype = require('./../config/base');
 
 function singleton(factory) {
 	var instance = create.prototype = tag;

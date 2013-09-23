@@ -1,6 +1,6 @@
 module.exports = prototype;
 
-prototype.prototype = require('./config/base');
+prototype.prototype = require('./../config/base');
 
 function prototype(factory) {
 	instance.prototype = prototype.prototype;
