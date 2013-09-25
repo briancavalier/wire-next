@@ -12,10 +12,7 @@
 		context.get('helloWire').sayHello(context.get('message'));
 		context.get('helloWire').sayHello(context.get('message'));
 
-		console.log(context.get('node').innerHTML);
-
-//		context.helloWire().sayHello(context.message);
-//		context.helloWire().sayHello(context.message);
+		context.destroy();
 	});
 
 })(curl);

@@ -1,18 +1,12 @@
+var iterator = require('../lib/iterator');
+
 module.exports = function byType(type) {
-
 	return function(components) {
+		return iterator.find(components, function(component) {
+			var componentType = component.metadata.type;
 
-		var id, component, componentType;
-
-		for(id in components) {
-
-			component = components[id];
-			componentType = component.metadata.type;
-
-			if(componentType
-				&& (componentType === type || componentType.prototype instanceof type)) {
-				return component;
-			}
-		}
+			return componentType
+				&& (componentType === type || componentType.prototype instanceof type)
+		});
 	};
 };

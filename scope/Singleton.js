@@ -1,15 +1,24 @@
-module.exports = singleton;
+var fn = require('../lib/fn');
 
-var tag = singleton.prototype = require('./../config/base');
+module.exports = function singleton(create, destroy) {
+	return fn.once(createInstance);
 
-function singleton(factory) {
-	var instance = create.prototype = tag;
+	function createInstance(context) {
+		var instance = create.call(this, context);
 
-	return create;
+		if(destroy) {
 
-	function create() {
-		return instance === tag
-			? (instance = factory.apply(this, arguments))
-			: instance;
+			var declaringContext = this.declaringContext;
+			var origDestroy = declaringContext.destroy;
+
+			declaringContext.destroy = function() {
+				declaringContext.destroy = origDestroy;
+				destroy(instance, context);
+
+				return  declaringContext.destroy();
+			};
+		}
+
+		return instance;
 	}
 }

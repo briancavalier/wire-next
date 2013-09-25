@@ -1,28 +1,6 @@
-var Map = require('./../lib/Map');
+var fn = require('../lib/fn');
+var prototype = require('./prototype');
 
-percontext.prototype = require('./../config/base');
-
-module.exports = percontext;
-
-function percontext(factory) {
-	var instancesByContext = new Map();
-
-	instance.prototype = percontext.prototype;
-
-	return instance;
-
-	function instance() {
-		var currentContext, contextInstance;
-
-		currentContext = this.currentContext;
-
-		if (instancesByContext.has(currentContext)) {
-			contextInstance = instancesByContext.get(currentContext);
-		} else {
-			contextInstance = factory.apply(this, arguments);
-			instancesByContext.set(currentContext, contextInstance);
-		}
-
-		return contextInstance;
-	}
-}
+module.exports = function percontext(create, destroy) {
+	return fn.memoize(prototype(create, destroy));
+};

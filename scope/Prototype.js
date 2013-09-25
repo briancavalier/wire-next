@@ -1,13 +1,19 @@
-module.exports = prototype;
+module.exports = function prototype(create, destroy) {
+	return function createInstance(context) {
+		var instance = create.call(this, context);
 
-prototype.prototype = require('./../config/base');
+		if(destroy) {
 
-function prototype(factory) {
-	instance.prototype = prototype.prototype;
+			var origDestroy = context.destroy;
 
-	return instance;
+			context.destroy = function() {
+				context.destroy = origDestroy;
+				destroy(instance, context);
 
-	function instance() {
-		return factory.apply(this, arguments);
+				return context.destroy();
+			};
+		}
+
+		return instance;
 	}
 }

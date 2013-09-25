@@ -1,7 +1,6 @@
-var config = require('./base');
 var singleton = require('../scope/singleton');
 var prototype = require('../scope/prototype');
-var injectDeps = require('../inject/deps');
+var inject = require('../inject/deps');
 var resolveArray = require('../inject/resolveArray');
 
 var slice = Array.prototype.slice;
@@ -18,8 +17,7 @@ function fluentConfig(configure) {
 
 	return function(context) {
 		return commands.reduce(function(context, command) {
-			command(context);
-			return context;
+			return command(context);
 		}, context);
 	};
 }
@@ -29,28 +27,38 @@ function FluentConfig(commands) {
 }
 
 FluentConfig.prototype = {
-	proto: function(metadata, deps, factory) {
-		return this._add(prototype, metadata, deps, factory);
+	proto: function(metadata, deps, create, destroy) {
+		return this._add(prototype, metadata, deps, create, destroy);
 	},
 
-	add: function(metadata, deps, factory) {
-		return this._add(singleton, metadata, deps, factory);
+	add: function(metadata, deps, create, destroy) {
+		return this._add(singleton, metadata, deps, create, destroy);
 	},
 
-	_add: function(scope, metadata, deps, factory) {
-		var resolver;
+	resolve: function(deps, handler) {
+		this._commands.push(function(context) {
+			inject(createResolver(deps), handler)(context);
+			return context;
+		});
 
-		if(typeof factory === 'undefined') {
-			factory = typeof deps === 'function' ? deps : function() { return deps; };
+		return this;
+	},
+
+	_add: function(scope, metadata, deps, create, destroy) {
+		if(typeof create === 'undefined') {
+			create = typeof deps === 'function' ? deps : function() { return deps; };
 		} else {
-			resolver = typeof deps !== 'function' ? resolveArray(deps) : deps;
-			factory = injectDeps(resolver, factory);
+			create = inject(createResolver(deps), create);
 		}
 
 		this._commands.push(function(context) {
-			return context.add(scope, metadata, factory);
+			return context.add(scope, metadata, create, destroy);
 		});
 
 		return this;
 	}
 };
+
+function createResolver(deps) {
+	return typeof deps !== 'function' ? resolveArray(deps) : deps;
+}
