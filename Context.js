@@ -1,6 +1,7 @@
 var fn = require('./lib/fn');
-var iterator = require('./lib/iterator');
 var meta = require('./lib/metadata');
+var iterator = require('./lib/iterator');
+var resolveArray = require('./inject/resolveArray');
 
 module.exports = Context;
 
@@ -36,6 +37,15 @@ Context.prototype = {
 			};
 		});
 
+		return this;
+	},
+
+	resolve: function(resolve, inject) {
+		if(Array.isArray(resolve)) {
+			resolve = resolveArray(resolve);
+		}
+
+		inject.apply(this, resolve(this, inject));
 		return this;
 	},
 

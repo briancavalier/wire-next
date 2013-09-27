@@ -37,8 +37,7 @@ FluentConfig.prototype = {
 
 	resolve: function(deps, handler) {
 		this._commands.push(function(context) {
-			inject(createResolver(deps), handler)(context);
-			return context;
+			return context.resolve(deps, handler);
 		});
 
 		return this;
