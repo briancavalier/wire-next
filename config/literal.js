@@ -11,8 +11,8 @@ module.exports = function literal(config) {
 			metadata.id = key;
 
 			var create = def.create;
-			if(def.deps) {
-				create = inject(createResolver(def.deps), create);
+			if(def.using) {
+				create = inject(createResolver(def.using), create);
 			}
 
 			return context.add(def.scope || singleton, metadata, create, def.destroy);

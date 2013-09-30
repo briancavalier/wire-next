@@ -26,16 +26,11 @@ Context.prototype = {
 			throw new Error('Component named ' + id + ' already registered');
 		}
 
-		components[id] = fn.once(function(context) {
-			var createInstance = scope(create, destroy);
-			return {
-				instance: function() {
-					return createInstance(context);
-				},
-				metadata: metadata,
-				declaringContext: context
-			};
-		});
+		components[id] = {
+			instance: scope(create, destroy),
+			metadata: metadata,
+			declaringContext: this
+		};
 
 		return this;
 	},
@@ -53,17 +48,17 @@ Context.prototype = {
 		var component = typeof criteria === 'function'
 			? this._find(criteria) : this._findById(criteria);
 
-		return component && component.instance();
+		return component && component.instance(this);
 	},
 
 	_findById: function(id) {
 		var component = this._components[id];
 
-		return component ? component(this) : this._parent && this._parent._findById(id);
+		return component || this._parent && this._parent._findById(id);
 	},
 
 	_find: function(query) {
-		var component = query(createIterator(this._components, this));
+		var component = query(createIterator(this._components));
 
 		return component || this._parent && this._parent._find(query);
 	},
@@ -73,8 +68,8 @@ Context.prototype = {
 	}
 };
 
-function createIterator(components, context) {
+function createIterator(components) {
 	return iterator.map(iterator.of(Object.keys(components)), function (key) {
-		return components[key](context);
+		return components[key];
 	});
 }
