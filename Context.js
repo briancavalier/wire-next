@@ -1,13 +1,24 @@
-var fn = require('./lib/fn');
 var meta = require('./lib/metadata');
 var iterator = require('./lib/iterator');
 var resolveArray = require('./inject/resolveArray');
+var Promise = require('truth');
 
 module.exports = Context;
 
 function Context(parent) {
 	this._parent = parent;
 	this._components = {};
+
+	if(parent) {
+		var parentDestroy = parent.destroy;
+		var self = this;
+		parent.destroy = function() {
+			parent.destroy = parentDestroy;
+
+			self.destroy();
+			parentDestroy.call(parent);
+		}
+	}
 }
 
 Context.prototype = {
@@ -40,36 +51,29 @@ Context.prototype = {
 			resolve = resolveArray(resolve);
 		}
 
-		inject.apply(this, resolve(this, inject));
-		return this;
+		return Promise.all(resolve(this, inject))
+			.then(inject.apply.bind(inject, this));
 	},
 
 	get: function(criteria) {
 		var component = typeof criteria === 'function'
-			? this._find(criteria) : this._findById(criteria);
+			? this._find(criteria)
+			: this._findById(criteria);
 
 		return component && component.instance(this);
 	},
 
 	_findById: function(id) {
 		var component = this._components[id];
-
-		return component || this._parent && this._parent._findById(id);
+		return component || this._parent && this._parent._findById && this._parent._findById(id);
 	},
 
 	_find: function(query) {
-		var component = query(createIterator(this._components));
-
-		return component || this._parent && this._parent._find(query);
+		var component = query(this._components);
+		return component || this._parent && this._parent._find && this._parent._find(query);
 	},
 
 	destroy: function() {
 		delete this._components;
 	}
 };
-
-function createIterator(components) {
-	return iterator.map(iterator.of(Object.keys(components)), function (key) {
-		return components[key];
-	});
-}

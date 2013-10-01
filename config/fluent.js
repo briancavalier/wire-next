@@ -1,7 +1,6 @@
 var singleton = require('../scope/singleton');
 var prototype = require('../scope/prototype');
 var inject = require('../inject/deps');
-var resolveArray = require('../inject/resolveArray');
 
 var slice = Array.prototype.slice;
 
@@ -44,20 +43,15 @@ FluentConfig.prototype = {
 	},
 
 	_add: function(scope, metadata, deps, create, destroy) {
-		if(typeof create === 'undefined') {
-			create = typeof deps === 'function' ? deps : function() { return deps; };
-		} else {
-			create = inject(createResolver(deps), create);
-		}
 
 		this._commands.push(function(context) {
-			return context.add(scope, metadata, create, destroy);
+			return context.add(scope, metadata, function(context) {
+				return context.resolve(deps, function() {
+					return create.apply(this, arguments);
+				});
+			}, destroy);
 		});
 
 		return this;
 	}
 };
-
-function createResolver(deps) {
-	return typeof deps !== 'function' ? resolveArray(deps) : deps;
-}

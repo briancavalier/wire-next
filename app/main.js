@@ -8,7 +8,7 @@ var counter = 0;
 
 var base = fluentConfig(function(config) {
 	config
-		.add({ id: 'message', type: String }, function() {
+		.proto({ id: 'message', type: String }, [], function() {
 			return 'I haz been wired ' + (++counter);
 		})
 		.proto('node', [], function() {

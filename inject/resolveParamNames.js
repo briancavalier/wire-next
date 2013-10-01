@@ -1,13 +1,9 @@
+var resolveArray = require('./resolveArray');
+
 module.exports = function(context, factory) {
 	var params = /\(([^\)]*)/.exec(factory.toString());
 
 	params = params && params[1];
-	if(params) {
-		params = params.split(/\s*,\s*/);
-		return params.map(function(name) {
-			return context.get(name);
-		});
-	}
+	return params ? resolveArray(params.split(/\s*,\s*/))(context) : [];
 
-	return [];
 };
