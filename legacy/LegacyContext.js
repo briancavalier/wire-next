@@ -1,11 +1,12 @@
-var resolveArray = require('../inject/resolveArray');
+var Base = require('../lib/ContextBase');
 var Promise = require('truth');
 
 module.exports = LegacyContext;
 
-function LegacyContext(wireContext, parent) {
-	this._wireContext = wireContext;
-	this._parent = parent;
+function LegacyContext(createWireContext, parent) {
+	Base.call(this, parent);
+
+	this._wireContext = createWireContext;
 
 	if(parent) {
 		var parentDestroy = parent.destroy;
@@ -20,49 +21,33 @@ function LegacyContext(wireContext, parent) {
 	}
 }
 
-LegacyContext.prototype = {
-	resolve: function(resolve, inject) {
-		if(Array.isArray(resolve)) {
-			resolve = resolveArray(resolve);
-		}
+LegacyContext.prototype = Object.create(Base.prototype);
 
-		return Promise.all(resolve(this, inject)).then(inject.apply.bind(inject, this));
-	},
-
-	get: function(criteria) {
-		var component = typeof criteria === 'function'
-			? this._find(criteria)
-			: this._findById(criteria);
-
-		return component && component.instance(this);
-	},
-
-	_findById: function(id) {
-		var wireContext, parent;
-
-		wireContext = this._wireContext;
-		parent = this._parent;
-
-		return {
-			instance: function() {
-				return Promise.cast(wireContext).then(function(context) {
-					return context.resolve(id);
-				}, function() {
-					return parent.get(id);
-				});
-			}
-		}
-	},
-
-	_find: function(criteria) {
-		if(this._parent) {
-			return this._parent._find(criteria);
-		}
-
-		throw new Error('LegacyContext only supports finding components by id');
-	},
-
-	destroy: function() {
-		return this._wireContext.destroy();
+LegacyContext.prototype.findComponent = function(id) {
+	if(typeof id !== 'string') {
+		return this._parent && this._parent.findComponent(id);
 	}
+
+	var self, parent;
+
+	self = this;
+	parent = this._parent;
+
+	return {
+		instance: function() {
+			if(typeof self._wireContext === 'function') {
+				self._wireContext = self._wireContext();
+			}
+
+			return Promise.cast(self._wireContext).then(function(context) {
+				return context.resolve(id);
+			}, function() {
+				return parent.get(id);
+			});
+		}
+	}
+};
+
+LegacyContext.prototype.destroy = function() {
+	return this._wireContext.destroy();
 };
