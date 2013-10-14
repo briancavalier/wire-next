@@ -5,47 +5,42 @@ module.exports = LegacyContext;
 
 function LegacyContext(createWireContext, parent) {
 	Base.call(this, parent);
-
 	this._wireContext = createWireContext;
-
-	if(parent) {
-		var parentDestroy = parent.destroy;
-		var self = this;
-		parent.destroy = function() {
-			parent.destroy = parentDestroy;
-
-			return self.destroy().then(function() {
-				return parentDestroy.call(parent);
-			});
-		}
-	}
 }
 
 LegacyContext.prototype = Object.create(Base.prototype);
 
-LegacyContext.prototype.findComponent = function(id) {
+LegacyContext.prototype.findComponents = function(id) {
+	var recurse;
+
 	if(typeof id !== 'string') {
-		return this._parent && this._parent.findComponent(id);
+		recurse = arguments[1] !== false && this._parent;
+		return recurse ? this._parent.findComponents(id) : [];
 	}
 
+	return this._byId(id);
+
+};
+
+LegacyContext.prototype._byId = function(id) {
 	var self, parent;
 
 	self = this;
 	parent = this._parent;
 
-	return {
+	return [{
 		instance: function() {
 			if(typeof self._wireContext === 'function') {
 				self._wireContext = self._wireContext();
 			}
 
-			return Promise.cast(self._wireContext).then(function(context) {
-				return context.resolve(id);
+			return Promise.cast(self._wireContext).then(function(wireContext) {
+				return wireContext.resolve(id);
 			}, function() {
 				return parent.get(id);
 			});
 		}
-	}
+	}];
 };
 
 LegacyContext.prototype.destroy = function() {

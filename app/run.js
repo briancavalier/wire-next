@@ -8,21 +8,26 @@
 			truth: { location: 'bower_components/truth', main: 'Promise',
 				config: { moduleLoader: 'curl/loader/cjsm11' } }
 		}
-//		preloads: ['./lib/promise']
 	};
 
-	curl(config, ['app/main', 'domReady!'], function(context) {
-		context.resolve(['helloWire', 'message'], function(helloWire, message) {
-			helloWire.sayHello(message);
+	curl(config, ['app/main', 'truth', 'domReady!'], function(context, Promise) {
+		Promise.all(context.resolve(['helloWire', 'message'])).then(function(args) {
+			args[0].sayHello(args[1]);
 		});
 
-		context.resolve(['helloWire', 'message'], function(helloWire, message) {
-			helloWire.sayHello(message);
+		Promise.all(context.resolve(['helloWire', 'message'])).then(function(args) {
+			args[0].sayHello(args[1]);
+			context.destroy();
 		});
 
-		context.resolve(['helloWire', 'message'], function(helloWire, message) {
-			helloWire.sayHello(message);
-		});
+//
+//		context.resolve(['helloWire', 'message'], function(helloWire, message) {
+//			helloWire.sayHello(message);
+//		});
+//
+//		context.resolve(['helloWire', 'message'], function(helloWire, message) {
+//			helloWire.sayHello(message);
+//		});
 
 	});
 

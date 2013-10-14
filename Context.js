@@ -7,17 +7,6 @@ module.exports = Context;
 function Context(parent) {
 	Base.apply(this, arguments);
 	this._components = {};
-
-	if(parent) {
-		var parentDestroy = parent.destroy;
-		var self = this;
-		parent.destroy = function() {
-			parent.destroy = parentDestroy;
-
-			self.destroy();
-			parentDestroy.call(parent);
-		}
-	}
 }
 
 Context.prototype = Object.create(Base.prototype);
@@ -26,7 +15,7 @@ Context.prototype.configure = function(config) {
 	return merge(arguments)(this);
 };
 
-Context.prototype.add = function(scope, metadata, create, destroy) {
+Context.prototype.add = function(metadata, create, destroy) {
 	var id, components;
 
 	metadata = meta.normalize(metadata);
@@ -38,7 +27,7 @@ Context.prototype.add = function(scope, metadata, create, destroy) {
 	}
 
 	components[id] = {
-		instance: scope(create, destroy),
+		instance: metadata.scope(create, destroy),
 		metadata: metadata,
 		declaringContext: this
 	};
@@ -46,14 +35,31 @@ Context.prototype.add = function(scope, metadata, create, destroy) {
 	return this;
 };
 
-Context.prototype.findComponent = function(criteria) {
-	var component = criteria === 'function'
-		? criteria(this._components)
-		: this._components[criteria];
+Context.prototype.findComponents = function(criteria) {
+	var recurse, components;
 
-	return component || this._parent && this._parent.findComponent(criteria);
-}
+	recurse = arguments[1] !== false && this._parent;
+	components = typeof criteria === 'function' ? this._queryComponents(criteria)
+		: [this._components[criteria]];
+
+	return recurse
+		? components.concat(this._parent.findComponents(criteria))
+		: components;
+};
 
 Context.prototype.destroy = function() {
 	delete this._components;
+};
+
+Context.prototype._queryComponents = function(criteria) {
+	var components = this._components;
+	return Object.keys(components).reduce(function(found, id) {
+		var component = components[id];
+
+		if(criteria(component)) {
+			found.push(component);
+		}
+
+		return found;
+	}, []);
 };

@@ -1,6 +1,7 @@
 var singleton = require('../scope/singleton');
 var prototype = require('../scope/prototype');
 var inject = require('../inject/deps');
+var Promise = require('truth');
 
 var slice = Array.prototype.slice;
 
@@ -26,6 +27,33 @@ function FluentConfig(commands) {
 }
 
 FluentConfig.prototype = {
+	create: function(metadata, deps, create, destroy) {
+		if(typeof metadata === 'string') {
+			metadata = { id: metadata };
+		}
+		metadata = Object.create(metadata, {
+			type: { value: create }
+		});
+		return this._add(singleton, metadata, deps, function() {
+			var instance;
+
+			if(create.prototype && Object.keys(create.prototype).length) {
+				instance = Object.create(create.prototype, {
+					constructor: {
+						value: create,
+						enumerable: false
+					}
+				});
+
+				create.apply(instance, arguments);
+			} else {
+				instance = create.apply(void 0, arguments);
+			}
+
+			return instance;
+		}, destroy);
+	},
+
 	proto: function(metadata, deps, create, destroy) {
 		return this._add(prototype, metadata, deps, create, destroy);
 	},
@@ -43,11 +71,17 @@ FluentConfig.prototype = {
 	},
 
 	_add: function(scope, metadata, deps, create, destroy) {
+		if(typeof metadata === 'string') {
+			metadata = { id: metadata };
+		}
+		var meta = Object.create(metadata, {
+			scope: { value: scope }
+		});
 
 		this._commands.push(function(context) {
-			return context.add(scope, metadata, function(context) {
-				return context.resolve(deps, function() {
-					return create.apply(this, arguments);
+			return context.add(meta, function(context) {
+				return Promise.all(context.resolve(deps)).then(function(deps) {
+					return create.apply(this, deps);
 				});
 			}, destroy);
 		});
