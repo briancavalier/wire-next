@@ -1,11 +1,13 @@
 var Base = require('../lib/ContextBase');
 var Promise = require('truth');
+var memoize = require('../lib/fn').memoize;
 
 module.exports = LegacyContext;
 
 function LegacyContext(createWireContext, parent) {
 	Base.call(this, parent);
 	this._wireContext = createWireContext;
+	this._byId = memoize(this._byId);
 }
 
 LegacyContext.prototype = Object.create(Base.prototype);
@@ -19,7 +21,6 @@ LegacyContext.prototype.findComponents = function(id) {
 	}
 
 	return this._byId(id);
-
 };
 
 LegacyContext.prototype._byId = function(id) {

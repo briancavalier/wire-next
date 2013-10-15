@@ -17,7 +17,9 @@
 
 		Promise.all(context.resolve(['helloWire', 'message'])).then(function(args) {
 			args[0].sayHello(args[1]);
-			context.destroy();
+			setTimeout(function() {
+				context.destroy();
+			}, 1000)
 		});
 
 //

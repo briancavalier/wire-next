@@ -4,12 +4,19 @@ var Promise = require('truth');
 var Map = require('../lib/Map');
 
 module.exports = function() {
+	var hasLifecycleRole = byRole('lifecycle');
 	var processors = new Map();
 
 	return installLifecycle(
 		function(instance, context) {
-			var component = this;
-			var lifecycleHandlers = context.findComponents(byRole('lifecycle'));
+			var component, lifecycleHandlers;
+
+			if(hasLifecycleRole(this)) {
+				return instance;
+			}
+
+			component = this;
+			lifecycleHandlers = context.findComponents(hasLifecycleRole);
 
 			return lifecycleHandlers.reduce(function(instance, processor) {
 				return when(processor.instance(context), function(processor) {
@@ -51,6 +58,7 @@ function applyPostCreate(instance, component, processor, context) {
 }
 
 function applyPreDestroys(list, context, instance) {
+	// TODO: Allow preDestroy to return a promise
 	return list.reduceRight(function (instance, processor) {
 		return typeof processor.preDestroy === 'function'
 			? processor.preDestroy(instance, context)

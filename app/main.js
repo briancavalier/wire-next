@@ -10,32 +10,31 @@ var counter = 0;
 
 var base = fluentConfig(function(config) {
 	config
-//		.add({ roles: ['lifecycle'] }, [], function() {
-//			return {
-//				postCreate: function(x) {
-//					console.log('creating', x);
-//					return x;
-//				},
-//				preDestroy: function(x) {
-//					console.log('destroying', x);
-//					var p = x.parentNode;
-//					if (p) {
-//						p.removeChild(x);
-//					}
-//					return x;
-//				}
-//			}
-//		})
 		.add({ roles: ['lifecycle'] }, [], function() {
+			return {
+				postCreate: function(x) {
+					console.log('creating', x);
+					return x;
+				},
+				preDestroy: function(x) {
+					console.log('destroying', x);
+					return x;
+				}
+			}
+		})
+		.add({ roles: ['lifecycle'] }, [], function() {
+			var hasProxyRole = byRole('proxy');
 			var proxies = new Map();
 
 			return {
 				postCreate: function(instance, component, context) {
-					if(component.metadata.roles && component.metadata.roles.indexOf('proxy') >= 0) {
+					var proxiers;
+
+					if(hasProxyRole(component)) {
 						return instance;
 					}
 
-					var proxiers = context.findComponents(byRole('proxy'));
+					proxiers = context.findComponents(hasProxyRole);
 
 					return proxiers.reduce(function(instance, proxier) {
 						return when(proxier.instance(context), function(proxier) {
@@ -59,10 +58,8 @@ var base = fluentConfig(function(config) {
 				},
 				preDestroy: function(instance) {
 					var proxy = proxies.get(instance);
-					if(proxy) {
-						return when(proxy.destroy(), function() {
-							return instance;
-						});
+					if(proxy && typeof proxy.destroy === 'function') {
+						return proxy.destroy();
 					}
 					return instance;
 				}
