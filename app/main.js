@@ -1,16 +1,17 @@
 var Context = require('wire/Context');
-var fluentConfig = require('wire/config/fluent');
+var fluent = require('wire/config/fluent');
+var merge = require('wire/config/merge');
 var enableLifecycle = require('wire/config/enableLifecycle');
+var enableProxySupport = require('wire/config/enableProxySupport');
 var type = require('wire/query/type');
-var byRole = require('wire/query/role');
 var Promise = require('truth');
 
 var HelloWire = require('app/HelloWire');
 var counter = 0;
 
-var base = fluentConfig(function(config) {
-	config
-		.add({ roles: ['lifecycle'] }, [], function() {
+var base = function(context) {
+	return context
+		.add({ roles: ['lifecycle'] }, function() {
 			return {
 				postCreate: function(x) {
 					console.log('creating', x);
@@ -22,83 +23,36 @@ var base = fluentConfig(function(config) {
 				}
 			}
 		})
-		.add({ roles: ['lifecycle'] }, [], function() {
-			var hasProxyRole = byRole('proxy');
-			var proxies = new Map();
-
-			return {
-				postCreate: function(instance, component, context) {
-					var proxiers;
-
-					if(hasProxyRole(component)) {
-						return instance;
-					}
-
-					proxiers = context.findComponents(hasProxyRole);
-
-					return proxiers.reduce(function(instance, proxier) {
-						return when(proxier.instance(context), function(proxier) {
-
-							return typeof proxier !== 'function' ? instance
-								: when(instance, function(instance) {
-									if(proxier === instance) {
-										return instance;
-									}
-									var proxy = proxier(instance);
-									if(proxy) {
-										proxies.set(instance, proxy);
-										return proxy;
-									}
-
-									return instance;
-								});
-						});
-					}, instance);
-
-				},
-				preDestroy: function(instance) {
-					var proxy = proxies.get(instance);
-					if(proxy && typeof proxy.destroy === 'function') {
-						return proxy.destroy();
-					}
-					return instance;
-				}
-			}
-		})
-		.add({ roles: ['proxy'] }, [], function() {
+		.add({ roles: ['proxy'] }, function() {
 			return function(x) {
 				console.log('proxy 1', x);
 				return x;
 			}
 		})
-		.add({ roles: ['proxy'] }, [], function() {
+		.add({ roles: ['proxy'] }, function() {
 			return function(x) {
 				console.log('proxy 2', x);
 				return x;
 			}
 		})
-		.proto('message', [], function() {
+		.add('message', function() {
 			return 'I haz been wired ' + (++counter);
 		})
-		.proto('node', [], function() {
+		.add('node', function() {
 			var node = document.createElement('h1');
 			node.className = 'hello';
 
 			document.body.appendChild(node);
 			return node;
 		})
-		.proto('helloWire', ['node'], function(node) {
-			return new HelloWire(node);
-		})
-});
+		.add('helloWire', function(context) {
+			return Promise.cast(context.get('node')).then(function(node) {
+				return new HelloWire(node);
+			});
+		});
+};
 
-module.exports = new Context()
-	.configure(enableLifecycle())
-	.configure(base);
-
-function when(x, f) {
-	return Promise.cast(x).then(f);
-}
+module.exports = merge([enableLifecycle(), base]);
 
 //var base = literalConfig({
 //	message: {

@@ -12,7 +12,7 @@ function Context(parent) {
 Context.prototype = Object.create(Base.prototype);
 
 Context.prototype.configure = function(config) {
-	return merge(arguments)(this);
+	return config(this);
 };
 
 Context.prototype.add = function(metadata, create, destroy) {

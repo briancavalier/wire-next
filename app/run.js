@@ -10,26 +10,18 @@
 		}
 	};
 
-	curl(config, ['app/main', 'truth', 'domReady!'], function(context, Promise) {
-		Promise.all(context.resolve(['helloWire', 'message'])).then(function(args) {
-			args[0].sayHello(args[1]);
+	curl(config, ['wire/wire!app/main', 'domReady!'], function(context) {
+		context.resolve(['helloWire', 'message'], function(helloWire, msg) {
+			helloWire.sayHello(msg);
 		});
 
-		Promise.all(context.resolve(['helloWire', 'message'])).then(function(args) {
-			args[0].sayHello(args[1]);
+
+		context.resolve(['helloWire', 'message'], function(helloWire, msg) {
+			helloWire.sayHello(msg);
 			setTimeout(function() {
 				context.destroy();
 			}, 1000)
 		});
-
-//
-//		context.resolve(['helloWire', 'message'], function(helloWire, message) {
-//			helloWire.sayHello(message);
-//		});
-//
-//		context.resolve(['helloWire', 'message'], function(helloWire, message) {
-//			helloWire.sayHello(message);
-//		});
 
 	});
 

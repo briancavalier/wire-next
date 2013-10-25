@@ -1,13 +1,14 @@
-var installLifecycle = require('../lib/lifecycleSupport');
+var extendLifecycle = require('../lib/extendLifecycle');
 var byRole = require('../query/role');
 var Promise = require('truth');
 var Map = require('../lib/Map');
 
+var hasLifecycleRole = byRole('lifecycle');
+
 module.exports = function() {
-	var hasLifecycleRole = byRole('lifecycle');
 	var processors = new Map();
 
-	return installLifecycle(
+	return extendLifecycle(
 		function(instance, context) {
 			var component, lifecycleHandlers;
 
