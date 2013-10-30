@@ -26,33 +26,6 @@ function FluentConfig(commands) {
 }
 
 FluentConfig.prototype = {
-	create: function(metadata, deps, create, destroy) {
-		if(typeof metadata === 'string') {
-			metadata = { id: metadata };
-		}
-		metadata = Object.create(metadata, {
-			type: { value: create }
-		});
-		return this._add(singleton, metadata, deps, function() {
-			var instance;
-
-			if(create.prototype && Object.keys(create.prototype).length) {
-				instance = Object.create(create.prototype, {
-					constructor: {
-						value: create,
-						enumerable: false
-					}
-				});
-
-				create.apply(instance, arguments);
-			} else {
-				instance = create.apply(void 0, arguments);
-			}
-
-			return instance;
-		}, destroy);
-	},
-
 	proto: function(metadata, deps, create, destroy) {
 		return this._add(prototype, metadata, deps, create, destroy);
 	},
@@ -70,21 +43,70 @@ FluentConfig.prototype = {
 	},
 
 	_add: function(scope, metadata, deps, create, destroy) {
-		if(typeof metadata === 'string') {
-			metadata = { id: metadata };
-		}
-		var meta = Object.create(metadata, {
-			scope: { value: scope }
-		});
+		var metaExtensions = { scope: { value: scope }};
+		var command;
 
-		this._commands.push(function(context) {
-			return context.add(meta, function(context) {
-				return Promise.all(context.resolve(deps)).then(function(deps) {
-					return create.apply(this, deps);
-				});
-			}, destroy);
-		});
+		if(typeof deps === 'function') {
+			destroy = create;
+			create = deps;
+			deps = void 0;
+		}
+
+		if(isConstructor(create)) {
+			metaExtensions.type = { value: create };
+			create = wrapConstructor(create);
+		}
+
+		metadata = extendMeta(metadata, metaExtensions);
+
+		if(deps === void 0) {
+			command = function(context) {
+				return context.add(metadata, create, destroy);
+			};
+		} else {
+			command = function(context) {
+				return context.add(metadata, function(context) {
+					var component = this;
+					return context.resolve(deps, function() {
+						return create.apply(component, arguments);
+					});
+				}, destroy);
+			};
+		}
+
+		this._commands.push(command);
 
 		return this;
 	}
 };
+
+function isConstructor(create) {
+	for(var p in create.prototype) {
+		return true;
+	}
+
+	return false;
+}
+
+function wrapConstructor(C) {
+	return function() {
+		var instance = Object.create(C.prototype, {
+			constructor: {
+				value: C,
+				enumerable: false
+			}
+		});
+
+		C.apply(instance, arguments);
+
+		return instance;
+	};
+}
+
+function extendMeta(metadata, props) {
+	if(typeof metadata === 'string') {
+		metadata = { id: metadata };
+	}
+
+	return Object.create(metadata, props);
+}
