@@ -10,10 +10,9 @@
 	};
 
 	curl(config, ['wire/wire!app/main', 'when/delay', 'domReady!'], function(context, delay) {
-//		context.resolve(['helloWire', 'message'], function(helloWire, msg) {
-//			helloWire.sayHello(msg);
-//		}).done();
-
+		context.resolve(['helloWire', 'message'], function(helloWire, msg) {
+			helloWire.sayHello(msg);
+		});
 
 		context.resolve(['helloWire', 'message'], function(helloWire, msg) {
 			helloWire.sayHello(msg);
