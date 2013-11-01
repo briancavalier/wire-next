@@ -2,8 +2,6 @@ var Context = require('wire/Context');
 var fluent = require('wire/config/fluent');
 var merge = require('wire/config/merge');
 var enableLifecycle = require('wire/config/enableLifecycle');
-var enableProxySupport = require('wire/config/enableProxySupport');
-var Promise = require('truth');
 
 var HelloWire = require('app/HelloWire');
 var counter = 0;
@@ -25,7 +23,7 @@ var base = fluent(function(config) {
 		.add('message', function() {
 			return 'I haz been wired ' + (++counter);
 		})
-		.proto('node', function() {
+		.add('node', function() {
 			var node = document.createElement('h1');
 			node.className = 'hello';
 
@@ -35,8 +33,9 @@ var base = fluent(function(config) {
 			if(node.parentNode) {
 				node.parentNode.removeChild(node);
 			}
+			return node;
 		})
-		.proto('helloWire', ['node'], HelloWire);
+		.add('helloWire', ['node'], HelloWire);
 });
 
-module.exports = merge([enableLifecycle(), enableProxySupport, base]);
+module.exports = merge([enableLifecycle(), base]);

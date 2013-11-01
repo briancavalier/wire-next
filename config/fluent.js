@@ -1,6 +1,5 @@
 var singleton = require('../scope/singleton');
 var prototype = require('../scope/prototype');
-var Promise = require('truth');
 
 var slice = Array.prototype.slice;
 

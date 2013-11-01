@@ -1,3 +1,5 @@
+var when = require('when');
+
 module.exports = function prototype(create, destroy) {
 	return function createInstance(context) {
 		var instance = create.call(this, context);
@@ -8,9 +10,10 @@ module.exports = function prototype(create, destroy) {
 
 			context.destroy = function() {
 				context.destroy = origDestroy;
-				destroy(instance, context);
+				return when(destroy(instance, context), function() {
+					return context.destroy();
+				});
 
-				return context.destroy();
 			};
 		}
 

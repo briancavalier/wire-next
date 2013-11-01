@@ -1,0 +1,27 @@
+{
+  "name": "wire",
+  "version": "0.0.1",
+  "authors": [
+    "Brian Cavalier <brian@hovercraftstudios.com>"
+  ],
+  "description": "wire.next",
+  "main": "wire.js",
+  "keywords": [
+    "ioc",
+    "cujo",
+    "cujojs"
+  ],
+  "license": "MIT",
+  "homepage": "http://cujojs.com",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "curl": "~0.8",
+    "when": "~2"
+  }
+}

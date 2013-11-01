@@ -1,6 +1,6 @@
 var byRole = require('../query/role');
 var Map = require('../lib/Map');
-var Promise = require('truth');
+var when = require('when');
 
 var hasProxyRole = byRole('proxy');
 
@@ -49,7 +49,3 @@ module.exports = function(context) {
 		}
 	})
 };
-
-function when(x, f) {
-	return Promise.cast(x).then(f);
-}

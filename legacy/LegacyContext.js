@@ -1,5 +1,5 @@
 var Base = require('../lib/ContextBase');
-var Promise = require('truth');
+var when = require('when');
 var memoize = require('../lib/fn').memoize;
 
 module.exports = LegacyContext;
@@ -35,7 +35,7 @@ LegacyContext.prototype._byId = function(id) {
 				self._wireContext = self._wireContext();
 			}
 
-			return Promise.cast(self._wireContext).then(function(wireContext) {
+			return when(self._wireContext, function(wireContext) {
 				return wireContext.resolve(id);
 			}, function() {
 				return parent.get(id);

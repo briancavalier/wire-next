@@ -1,4 +1,5 @@
 var fn = require('../lib/fn');
+var when = require('when');
 
 module.exports = function singleton(create, destroy) {
 	return fn.once(createInstance);
@@ -13,9 +14,10 @@ module.exports = function singleton(create, destroy) {
 
 			declaringContext.destroy = function() {
 				declaringContext.destroy = origDestroy;
-				destroy(instance, context);
 
-				return  declaringContext.destroy();
+				return when(destroy(instance, context), function() {
+					return declaringContext.destroy();
+				});
 			};
 		}
 

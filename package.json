@@ -1,0 +1,21 @@
+{
+  "name": "wire",
+  "version": "0.0.1",
+  "description": "wire.next",
+  "main": "Context.js",
+  "dependencies": {
+    "bower": "~1",
+    "when": "~2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "buster-test"
+  },
+  "keywords": [
+    "ioc",
+    "cujo",
+    "cujojs"
+  ],
+  "author": "brian@hovercraftstudios.com",
+  "license": "MIT"
+}

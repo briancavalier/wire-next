@@ -1,6 +1,6 @@
 var extendLifecycle = require('../lib/extendLifecycle');
 var byRole = require('../query/role');
-var Promise = require('truth');
+var when = require('when');
 var Map = require('../lib/Map');
 
 var hasLifecycleRole = byRole('lifecycle');
@@ -23,13 +23,9 @@ module.exports = function() {
 				return when(processor.instance(context), function(processor) {
 
 					return processor && typeof processor.postCreate === 'function'
-						? applyPostCreate(instance, component, processor, context).then(stashProcessor)
+						? applyPostCreate(instance, component, context,
+							processor, processors)
 						: instance;
-
-					function stashProcessor(instance) {
-						addProcessor(instance, processor, processors);
-						return instance;
-					}
 				});
 			}, instance);
 		},
@@ -48,12 +44,13 @@ module.exports = function() {
 	);
 };
 
-function applyPostCreate(instance, component, processor, context) {
+function applyPostCreate(instance, component, context, processor, processors) {
 	return when(instance, function (instance) {
 		if (instance === processor) {
 			return instance;
 		}
 
+		addProcessor(instance, processor, processors)
 		return processor.postCreate(instance, component, context);
 	});
 }
@@ -62,7 +59,9 @@ function applyPreDestroys(list, context, instance) {
 	// TODO: Allow preDestroy to return a promise
 	return list.reduceRight(function (instance, processor) {
 		return typeof processor.preDestroy === 'function'
-			? processor.preDestroy(instance, context)
+			? when(instance, function(instance) {
+				return processor.preDestroy(instance, context)
+			})
 			: instance;
 	}, instance);
 }
@@ -74,8 +73,4 @@ function addProcessor(instance, processor, map) {
 	} else {
 		list.push(processor);
 	}
-}
-
-function when(x, f) {
-	return Promise.cast(x).then(f);
 }
