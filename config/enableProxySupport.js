@@ -27,10 +27,11 @@ module.exports = function(context) {
 								if(proxier === instance) {
 									return instance;
 								}
+								// TODO: Pass in existing proxy also
+								// to allow decoration/extension?
 								var proxy = proxier(instance);
 								if(proxy) {
 									proxies.set(instance, proxy);
-									return proxy;
 								}
 
 								return instance;
