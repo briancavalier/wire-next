@@ -2,8 +2,10 @@
 
 	var config = {
 		packages: {
-			app: { location: '.', config: { moduleLoader: 'curl/loader/cjsm11' } },
-			wire: { location: '..', config: { moduleLoader: 'curl/loader/cjsm11' }, main: 'wire' },
+			app: { location: '.', config: { moduleLoader: 'curl/loader/cjsm11', init: 'app/init' } },
+			wire: { location: '..', main: 'wire',
+				config: { moduleLoader: 'curl/loader/cjsm11' }
+			},
 			curl: { location: 'bower_components/curl/src/curl', main: 'curl' },
 			when: { location: 'bower_components/when', main: 'when' }
 		}

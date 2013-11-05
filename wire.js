@@ -1,10 +1,14 @@
 define(function(require) {
-	var Context = require('./Context');
+	var defaultInitializer = './config/defaultInitializer';
 
 	return {
-		load: function(resourceId, require, loaded, cfg) {
-			require([resourceId], function(config) {
-				new Context().configure(config).configure(loaded);
+		load: function(resourceId, resourceLocalRequire, loaded, cfg) {
+			var init = (cfg && cfg.init) || defaultInitializer;
+
+			resourceLocalRequire([resourceId], function(config) {
+				require([init], function(init) {
+					loaded(init().configure(config));
+				}, loaded.error);
 			}, loaded.error);
 		}
 	};
