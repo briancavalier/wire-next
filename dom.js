@@ -1,23 +1,31 @@
 var fluent = require('./config/fluent');
 var context = require('./scope/context');
+var dom = require('./lib/dom/core');
+var on = require('./lib/dom/on');
+var render = require('./lib/dom/render');
+var NodeProxy = require('./lib/dom/NodeProxy');
 
-var dom = require('./lib/dom');
-var on = require('./lib/on');
+var when = require('when');
 
 module.exports = fluent(function(config) {
 	config
-		.add('id', function() {
+		.add('domReady', function() {
+			return when.promise(function(resolve) {
+				require(['domReady!'], resolve);
+			});
+		})
+		.add('id', ['domReady'], function() {
 			return dom.id;
 		})
-		.add('qs', function() {
+		.add('qs', ['domReady'], function() {
 			return dom.qs;
 		})
-		.add('qsa', function() {
+		.add('qsa', ['domReady'], function() {
 			return dom.qsa;
 		})
 		.add('render', function() {
 			return function(template, hash, css) {
-				return dom.render(template, hash, void 0, css);
+				return render(template, hash, void 0, css);
 			};
 		})
 		.add('insert', function() {
@@ -34,17 +42,6 @@ module.exports = fluent(function(config) {
 			};
 		});
 });
-
-function NodeProxy(node) {
-	this._node = node;
-}
-
-NodeProxy.prototype.destroy = function() {
-	var node = this._node;
-	if(node && node.parentNode) {
-		node.parentNode.removeChild(node);
-	}
-};
 
 function isNode(it) {
 	return typeof Node === "object"
