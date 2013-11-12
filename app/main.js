@@ -14,7 +14,7 @@ module.exports = fluent(function(config) {
 		.proto('node', ['render', 'insert', 'qs'], function(render, insert, qs) {
 			return insert(render('<h1 class="hello"></h1>'), qs('.hello'), 'first');
 		})
-		.proto('helloWire', ['node'], HelloWire)
+		.proto('helloWire@controller', ['node'], HelloWire)
 		.add('button', ['render', 'insert'], function(render, insert) {
 			return insert(render('<button>Destroy</button>'), document.body);
 		})

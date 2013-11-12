@@ -1,5 +1,6 @@
 var singleton = require('../scope/singleton');
 var prototype = require('../scope/prototype');
+var meta = require('../lib/metadata');
 
 var slice = Array.prototype.slice;
 
@@ -103,9 +104,5 @@ function wrapConstructor(C) {
 }
 
 function extendMeta(metadata, props) {
-	if(typeof metadata === 'string') {
-		metadata = { id: metadata };
-	}
-
-	return Object.create(metadata, props);
+	return Object.create(meta.normalize(metadata), props);
 }

@@ -4,7 +4,7 @@ var when = require('when');
 
 var hasProxyRole = byRole('proxy');
 
-module.exports = function(context) {
+module.exports = function enableProxySupport(context) {
 	return context.add({ roles: ['lifecycle'] }, function() {
 		var proxies = new Map();
 

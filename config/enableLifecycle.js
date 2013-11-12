@@ -5,7 +5,7 @@ var Map = require('../lib/Map');
 
 var hasLifecycleRole = byRole('lifecycle');
 
-module.exports = function() {
+module.exports = function enableLifecycle() {
 	var processors = new Map();
 
 	return extendLifecycle(

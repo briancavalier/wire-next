@@ -20,7 +20,7 @@
 			helloWire.sayHello(msg);
 		});
 
-		context.resolve(['helloWire', 'message'], function(helloWire, msg) {
+		context.resolve(['@controller', 'message'], function(helloWire, msg) {
 			helloWire.sayHello(msg);
 		})
 

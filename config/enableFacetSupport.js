@@ -5,7 +5,7 @@ var all = when.all;
 
 var hasFacetRole = byRole('facet');
 
-module.exports = function(context) {
+module.exports = function enableFacetSupport(context) {
 	return context
 		.add({ roles: ['lifecycle'] }, function() {
 			return {
@@ -28,7 +28,7 @@ module.exports = function(context) {
 					return remove();
 				}));
 			}
-		)
+		);
 };
 
 function wrapFacet(facet, connections) {
