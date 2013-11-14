@@ -16,7 +16,7 @@
 			on('click', button, context.destroy.bind(context));
 		});
 
-		context.resolve(['helloWire', 'message', 'button'], function(helloWire, msg) {
+		context.resolve(['helloWire@controller', 'message', 'button'], function(helloWire, msg) {
 			helloWire.sayHello(msg);
 		});
 

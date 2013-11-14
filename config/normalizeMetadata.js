@@ -22,8 +22,14 @@ module.exports = function normalizeMetadata(context) {
 };
 
 function normalizeCriteria(criteria) {
-	if (typeof criteria === 'string' && criteria[0] === '@') {
-		return role(criteria.slice(1));
+	var split;
+	if (typeof criteria === 'string') {
+		split = criteria.split('@');
+		if(split.length > 1) {
+			return split[0]
+				? role(split[1], function(value) { return value === split[0]; })
+				: role(split[1]);
+		}
 	}
 
 	return criteria;

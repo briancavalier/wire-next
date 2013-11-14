@@ -31,10 +31,10 @@ module.exports = fluent(function(config) {
 		.add('insert', function() {
 			return dom.insert;
 		})
-		.add({ id: 'on', roles: ['facet'], scope: context }, function() {
+		.add({ id: 'on', roles: { facet: true }, scope: context }, function() {
 			return on;
 		})
-		.add({ roles: ['proxy'], scope: context }, function() {
+		.add({ roles: { proxy: true }, scope: context }, function() {
 			return function(instance) {
 				if(isNode(instance)) {
 					return new NodeProxy(instance);

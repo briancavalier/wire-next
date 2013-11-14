@@ -7,7 +7,7 @@ var hasFacetRole = byRole('facet');
 
 module.exports = function enableFacetSupport(context) {
 	return context
-		.add({ roles: ['lifecycle'] }, function() {
+		.add('@lifecycle', function() {
 			return {
 				postCreate: function(instance, component, context) {
 					if(!hasFacetRole(component)) {
@@ -19,7 +19,7 @@ module.exports = function enableFacetSupport(context) {
 				}
 			}
 		})
-		.add({ roles: ['connection-manager'], scope: context },
+		.add({ roles: { 'connection-manager': true }, scope: context },
 			function() {
 				return [];
 			},
