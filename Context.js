@@ -1,5 +1,4 @@
 var Base = require('./lib/ContextBase');
-var merge = require('./config/merge');
 
 module.exports = Context;
 
