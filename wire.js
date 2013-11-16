@@ -7,7 +7,7 @@ define(function(require) {
 
 			resourceLocalRequire([resourceId], function(config) {
 				require([init], function(init) {
-					loaded(init().configure(config));
+					init().configure(config).startup();
 				}, loaded.error);
 			}, loaded.error);
 		}
