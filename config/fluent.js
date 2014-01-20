@@ -1,8 +1,7 @@
 var singleton = require('../scope/singleton');
 var prototype = require('../scope/prototype');
 var meta = require('../lib/metadata');
-
-var slice = Array.prototype.slice;
+var when = require('when');
 
 module.exports = fluentConfig;
 
@@ -68,7 +67,8 @@ FluentConfig.prototype = {
 				return context.add(metadata, function(context) {
 					var component = this;
 					return context.resolve(deps, function() {
-						return create.apply(component, arguments);
+						var args = resolveArgs(arguments, deps);
+						return create.apply(component, args);
 					});
 				}, destroy);
 			};
@@ -79,6 +79,18 @@ FluentConfig.prototype = {
 		return this;
 	}
 };
+
+function resolveArgs(args, deps) {
+	return Array.prototype.map.call(args, function(components, i) {
+		if(components.length === 0) {
+			throw new Error("No components found: " + deps[i]);
+		} else if(components.length === 1) {
+			return components[0];
+		}
+
+		return components;
+	});
+}
 
 function isConstructor(create) {
 	for(var p in create.prototype) {

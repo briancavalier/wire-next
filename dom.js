@@ -8,7 +8,7 @@ var NodeProxy = require('./lib/dom/NodeProxy');
 var when = require('when');
 
 module.exports = fluent(function(config) {
-	config
+	return config
 		.add('domReady', function() {
 			return when.promise(function(resolve) {
 				require(['domReady!'], resolve);
