@@ -2,7 +2,7 @@ define(function(require) {
 	var defaultInitializer = './config/defaultInitializer';
 
 	var autoConfig = {
-		'cola': 'app/lib/bard-init'
+		'cola': 'cola/wire/init'
 	};
 
 	var slice = Array.prototype.slice;
