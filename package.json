@@ -4,10 +4,11 @@
   "description": "wire.next",
   "main": "Context.js",
   "dependencies": {
-    "bower": "~1",
     "when": "~2"
   },
-  "devDependencies": {},
+  "devDependencies": {
+	  "bower": "~1"
+  },
   "scripts": {
     "test": "buster-test"
   },

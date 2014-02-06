@@ -21,7 +21,9 @@
     "tests"
   ],
   "dependencies": {
-    "curl": "~0.8",
     "when": "~2"
+  },
+  "devDependencies": {
+	"curl": "~0.8"
   }
 }
