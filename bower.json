@@ -6,6 +6,8 @@
   ],
   "description": "wire.next",
   "main": "wire.js",
+  "moduleType": "node",
+  "boot": "boot",
   "keywords": [
     "ioc",
     "cujo",

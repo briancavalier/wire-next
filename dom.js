@@ -1,17 +1,18 @@
 var fluent = require('./config/fluent');
 var context = require('./scope/context');
 var dom = require('./lib/dom/core');
+var domReady = require('./lib/dom/ready');
 var on = require('./lib/dom/on');
 var render = require('./lib/dom/render');
 var NodeProxy = require('./lib/dom/NodeProxy');
 
 var when = require('when');
 
-module.exports = fluent(function(config) {
+module.exports = fluent(function wireDomConfig(config) {
 	return config
 		.add('domReady', function() {
 			return when.promise(function(resolve) {
-				require(['domReady!'], resolve);
+				domReady(resolve);
 			});
 		})
 		.add('id', ['domReady'], function() {
@@ -36,17 +37,9 @@ module.exports = fluent(function(config) {
 		})
 		.add({ roles: { proxy: true }, scope: context }, function() {
 			return function(instance) {
-				if(isNode(instance)) {
+				if(dom.isNode(instance)) {
 					return new NodeProxy(instance);
 				}
 			};
 		});
 });
-
-function isNode(it) {
-	return typeof Node === "object"
-		? it instanceof Node
-		: it != null && typeof it === "object"
-			   && typeof it.nodeType === "number"
-			   && typeof it.nodeName === "string";
-}
