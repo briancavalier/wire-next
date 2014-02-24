@@ -3,13 +3,12 @@ var autoConfig = {
 	'cola': 'cola/wire/init'
 };
 
-//var hardcodedMainSpecFixMe = 'boot-todos/main';
-
 module.exports = function bootAutoconfig(context) {
-	var configs = [defaultInitializer, context.main];
+	var main = context.app.main;
+	var configs = [defaultInitializer, main];
 
 	configs = parsePackages(context.packages, configs)
-		.map(normalizeAndImport(context.loader, context.main));
+		.map(normalizeAndImport(context.loader, main));
 
 	return Promise.all(configs).then(function(configs) {
 		var init = configs[0];

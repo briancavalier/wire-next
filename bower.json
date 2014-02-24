@@ -5,9 +5,9 @@
     "Brian Cavalier <brian@hovercraftstudios.com>"
   ],
   "description": "wire.next",
-  "main": "wire.js",
+  "main": "wire",
   "moduleType": "node",
-  "boot": "boot",
+  "rave": "rave",
   "keywords": [
     "ioc",
     "cujo",
