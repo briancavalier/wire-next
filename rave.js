@@ -3,12 +3,16 @@ var autoConfig = {
 	'cola': 'cola/wire/init'
 };
 
-module.exports = function bootAutoconfig(context) {
-	var main = context.app.main;
-	var configs = [defaultInitializer, main];
+module.exports = function wireRaveAutoconfig(context) {
+	return new WireRave(parsePackages(context.packages, [defaultInitializer, context.app.main]));
+};
 
-	configs = parsePackages(context.packages, configs)
-		.map(normalizeAndImport(context.loader, main));
+function WireRave(configs) {
+	this._configs = configs;
+}
+
+WireRave.prototype.main = function() {
+	var configs = this._configs.map(require.async);
 
 	return Promise.all(configs).then(function(configs) {
 		var init = configs[0];
@@ -19,9 +23,7 @@ module.exports = function bootAutoconfig(context) {
 		}, init());
 
 		return wireContext.configure(mainSpec).startup();
-	}).catch(function(e) {
-			console.error(e.stack);
-		});
+	});
 };
 
 function parsePackages(packages, appendTo) {
@@ -41,10 +43,4 @@ function parsePackages(packages, appendTo) {
 
 		return configs;
 	}, appendTo);
-}
-
-function normalizeAndImport(loader, referrerName) {
-	return function(id) {
-		return loader.import(loader.normalize(id, referrerName));
-	};
 }
