@@ -12,7 +12,7 @@ function WireRave(configs) {
 }
 
 WireRave.prototype.main = function() {
-	var configs = this._configs.map(require.async);
+	var configs = this._configs.map(loadConfig);
 
 	return Promise.all(configs).then(function(configs) {
 		var init = configs[0];
@@ -25,6 +25,10 @@ WireRave.prototype.main = function() {
 		return wireContext.configure(mainSpec).startup();
 	});
 };
+
+function loadConfig(id) {
+	return require.async(id);
+}
 
 function parsePackages(packages, appendTo) {
 	var unique = appendTo.reduce(function(unique, key) {
