@@ -9,6 +9,6 @@ var merge = require('wire/config/merge');
 
 var baseConfig = merge([normalizeMetadata, enableLifecycle(), enableProxySupport, enableFacetSupport, enableAutostart]);
 
-module.exports = function() {
-	return new Context().configure(baseConfig);
+module.exports = function(parent) {
+	return new Context(parent).configure(baseConfig);
 };

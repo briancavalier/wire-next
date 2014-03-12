@@ -33,14 +33,6 @@ FluentConfig.prototype = {
 		return this._add(singleton, metadata, deps, create, destroy);
 	},
 
-	resolve: function(deps, handler) {
-		this._commands.push(function(context) {
-			return context.resolve(deps, handler);
-		});
-
-		return this;
-	},
-
 	_add: function(scope, metadata, deps, create, destroy) {
 		var metaExtensions = { scope: { value: scope }};
 		var command;
