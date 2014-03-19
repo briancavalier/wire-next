@@ -5,9 +5,9 @@ var enableProxySupport = require('./enableProxySupport');
 var normalizeMetadata = require('./normalizeMetadata');
 var enableAutostart = require('./enableAutostart');
 
-var merge = require('wire/config/merge');
+var merge = require('./merge');
 
-var baseConfig = merge([normalizeMetadata, enableLifecycle(), enableProxySupport, enableFacetSupport, enableAutostart]);
+var baseConfig = merge([normalizeMetadata, enableLifecycle, enableProxySupport, enableFacetSupport, enableAutostart]);
 
 module.exports = function(parent) {
 	return new Context(parent).configure(baseConfig);

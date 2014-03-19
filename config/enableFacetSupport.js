@@ -1,7 +1,6 @@
 var prototype = require('../scope/prototype');
 var byRole = require('../query/role');
 var when = require('when');
-var all = when.all;
 
 var hasFacetRole = byRole('facet');
 
@@ -15,7 +14,7 @@ module.exports = function enableFacetSupport(context) {
 					}
 
 					var connections = context.get(byRole('connection-manager'));
-					return all([instance, connections]).spread(wrapFacet);
+					return when.join(instance, connections).spread(wrapFacet);
 				}
 			}
 		})
@@ -24,9 +23,9 @@ module.exports = function enableFacetSupport(context) {
 				return [];
 			},
 			function(connections) {
-				return all(connections.map(function(remove) {
+				return when.map(connections, function(remove) {
 					return remove();
-				}));
+				});
 			}
 		);
 };

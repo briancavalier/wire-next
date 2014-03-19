@@ -4,7 +4,7 @@
   "description": "wire.next",
   "main": "Context.js",
   "dependencies": {
-    "when": "~2"
+    "when": "~3"
   },
   "devDependencies": {
 	  "bower": "~1"

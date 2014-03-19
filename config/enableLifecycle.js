@@ -1,76 +1,119 @@
-var extendLifecycle = require('../lib/extendLifecycle');
-var byRole = require('../query/role');
 var when = require('when');
+var byRole = require('../query/role');
 var Map = require('../lib/Map');
 
 var hasLifecycleRole = byRole('lifecycle');
 
-module.exports = function enableLifecycle() {
-	var processors = new Map();
-
-	return extendLifecycle(
-		function(instance, context) {
-			var component, lifecycleHandlers;
-
-			if(hasLifecycleRole(this)) {
-				return instance;
-			}
-
-			component = this;
-			lifecycleHandlers = context.findComponents(hasLifecycleRole);
-
-			return lifecycleHandlers.reduce(function(instance, processor) {
-				return when(processor.instance(context), function(processor) {
-
-					return processor && typeof processor.postCreate === 'function'
-						? applyPostCreate(instance, component, context,
-							processor, processors)
-						: instance;
-				});
-			}, instance);
+module.exports = function enableLifecycle(context) {
+	return Object.create(context, {
+		add: {
+			value: function(metadata, create, destroy) {
+				return runLifecycle.call(this, context, metadata, create, destroy)
+			},
+			configurable: true, writable: true
 		},
 
-		function(instance, context) {
-			return when(instance, function(instance) {
-				var list = processors.get(instance);
-				if(list) {
-					instance = applyPreDestroys(list, context, instance);
-					processors.delete(instance);
-				}
+		_lifecycleProcessors: {
+			value: void 0,
+			configurable: true, writable: true
+		},
 
-				return instance;
-			});
+		_postCreateHook: {
+			value: postCreateHook,
+			configurable: true, writable: true
+		},
+
+		_preDestroyHook: {
+			value: preDestroyHook,
+			configurable: true, writable: true
 		}
-	);
+	});
 };
 
-function applyPostCreate(instance, component, context, processor, processors) {
-	return when(instance, function (instance) {
-		if (instance === processor) {
-			return instance;
-		}
+function runLifecycle(origContext, metadata, create, destroy) {
+	if(!this._lifecycleProcessors) {
+		this._lifecycleProcessors = new Map();
+	}
 
-		addProcessor(instance, processor, processors)
-		return processor.postCreate(instance, component, context);
+	var self = this;
+	return origContext.add.call(this, metadata, createWithLifecycle, destroyWithLifecycle);
+
+	function createWithLifecycle() {
+		return self._postCreateHook(create.apply(this, arguments), this, origContext);
+	}
+
+	function destroyWithLifecycle(instance, context) {
+		return self._preDestroyHook(instance, this, destroy, context);
+	}
+
+}
+
+function postCreateHook(instance, component, context) {
+	if(hasLifecycleRole(component)) {
+		return instance;
+	}
+
+	var lifecycleHandlers = context.findComponents(hasLifecycleRole);
+
+	var state = {
+		instance: instance,
+		processors: [],
+		lifecycleProcessors: this._lifecycleProcessors
+	};
+
+	return when.reduce(lifecycleHandlers, function(state, processor) {
+		return when(processor.instance(context), function(processor) {
+
+			if(processor && typeof processor.postCreate === 'function') {
+				return when(state.instance, function(instance) {
+					return when(applyPostCreate(instance, component, context, processor),
+						function(instance) {
+							state.instance = instance;
+							state.processors.push(processor);
+							return state;
+						});
+				});
+			}
+
+			return state;
+		});
+
+	}, state).then(function(state) {
+		state.lifecycleProcessors.set(state.instance, state.processors);
+		return state.instance;
 	});
 }
 
-function applyPreDestroys(list, context, instance) {
-	// TODO: Allow preDestroy to return a promise
-	return list.reduceRight(function (instance, processor) {
-		return typeof processor.preDestroy === 'function'
-			? when(instance, function(instance) {
-				return processor.preDestroy(instance, context)
-			})
-			: instance;
-	}, instance);
+function preDestroyHook(instance, component, destroy, context) {
+	var processors = this._lifecycleProcessors;
+
+	return when(instance, function(instance) {
+		var list = processors.get(instance);
+		if(list) {
+			instance = applyPreDestroys(list, context, instance);
+			processors.delete(instance);
+		}
+
+		return instance;
+	}).then(destroyInstance);
+
+	function destroyInstance(instance) {
+		return destroy ? destroy.call(component, instance, context) : instance;
+	}
 }
 
-function addProcessor(instance, processor, map) {
-	var list = map.get(instance);
-	if(!list) {
-		map.set(instance, [processor]);
-	} else {
-		list.push(processor);
+function applyPostCreate(instance, component, context, processor) {
+	if (instance === processor) {
+		return instance;
 	}
+
+	return processor.postCreate(instance, component, context);
+}
+
+function applyPreDestroys(list, context, instance) {
+	return when.reduceRight(list, function(instance, processor) {
+		return typeof processor.preDestroy === 'function'
+			? processor.preDestroy(instance, context)
+			: instance;
+	}, instance);
 }

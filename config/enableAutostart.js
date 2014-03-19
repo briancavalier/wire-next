@@ -1,6 +1,10 @@
 module.exports = function enableAutostart(context) {
-	var initialized = false;
 	return Object.create(context, {
+		_initialized: {
+			value: false,
+			configurable: true,
+			writable: true
+		},
 		startup: {
 			value: function() {
 				return this.resolve(['@startup'], identity);
@@ -14,8 +18,8 @@ module.exports = function enableAutostart(context) {
 
 				args = Array.prototype.slice.call(arguments);
 
-				if(!initialized) {
-					initialized = true;
+				if(!this._initialized) {
+					this._initialized = true;
 					self = this;
 					return this.resolve(['@init'], function() {
 						return context.resolve.apply(self, args);

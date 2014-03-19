@@ -42,6 +42,7 @@ Context.prototype.findComponents = function(criteria) {
 
 Context.prototype.destroy = function() {
 	delete this._components;
+	return Base.prototype.destroy.apply(this, arguments);
 };
 
 Context.prototype._queryComponents = function(criteria) {
