@@ -7,5 +7,5 @@ function mergeConfigs(configs) {
 		return reduce.call(configs, function(context, configure) {
 			return configure(context);
 		}, context);
-	}
+	};
 }

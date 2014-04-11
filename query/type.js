@@ -4,5 +4,5 @@ module.exports = function byType(type) {
 
 		return componentType
 			&& (componentType === type || componentType.prototype instanceof type);
-	}
+	};
 };

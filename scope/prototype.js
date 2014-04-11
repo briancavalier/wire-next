@@ -3,5 +3,5 @@ module.exports = function prototype(create, destroy) {
 		var instance = create.call(this, context);
 		context.addInstance(instance, destroy);
 		return instance;
-	}
+	};
 };

@@ -1,7 +1,6 @@
 var singleton = require('../scope/singleton');
 var prototype = require('../scope/prototype');
 var meta = require('../lib/metadata');
-var when = require('when');
 
 module.exports = fluentConfig;
 
@@ -75,7 +74,7 @@ FluentConfig.prototype = {
 function resolveArgs(args, deps) {
 	return Array.prototype.map.call(args, function(components, i) {
 		if(components.length === 0) {
-			throw new Error("No components found: " + deps[i]);
+			throw new Error('No components found: ' + deps[i]);
 		} else if(components.length === 1) {
 			return components[0];
 		}

@@ -7,7 +7,9 @@
     "when": "~3"
   },
   "devDependencies": {
-	  "bower": "~1"
+	  "bower": "~1", 
+	  "buster": "~0.7",
+    "benchmark": "~1"
   },
   "scripts": {
     "test": "buster-test"
