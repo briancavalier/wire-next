@@ -36,9 +36,15 @@ Context.prototype.add = function(metadata, create, destroy) {
 
 Context.prototype.findComponents = function(criteria) {
 	var recurse = arguments[1] !== false && this._parent;
-	
-	var components = typeof criteria === 'function' ? this._queryComponents(criteria)
-		: this._metadataSearch.find(criteria);
+
+	var components;
+	if(typeof criteria === 'function') {
+		components = this._queryComponents(criteria);		
+	} else if (typeof criteria === 'string') {
+		components = criteria in this._components ? [this._components[criteria]] : [];
+	} else {
+		components = this._metadataSearch.find(criteria);
+	}
 	
 	return recurse
 		? components.concat(this._parent.findComponents(criteria))
