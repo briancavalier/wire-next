@@ -26,6 +26,7 @@
     "when": "~3"
   },
   "devDependencies": {
-    "curl": "~0.8"
+    "curl": "~0.8",
+    "buster.js": "~0.7"
   }
 }

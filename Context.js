@@ -1,10 +1,12 @@
 var Base = require('./lib/ContextBase');
+var MetadataSearch = require('./lib/MetadataSearch');
 
 module.exports = Context;
 
 function Context(parent) {
-	Base.apply(this, arguments);
+	Base.call(this, parent);
 	this._components = {};
+	this._metadataSearch = new MetadataSearch();
 }
 
 Context.prototype = Object.create(Base.prototype);
@@ -26,21 +28,31 @@ Context.prototype.add = function(metadata, create, destroy) {
 		metadata: metadata,
 		declaringContext: this
 	};
+	
+	this._metadataSearch.add(metadata, components[id]);
 
 	return this;
 };
 
 Context.prototype.findComponents = function(criteria) {
 	var recurse = arguments[1] !== false && this._parent;
-	var components = typeof criteria === 'function' ? this._queryComponents(criteria)
-		: criteria in this._components ? [this._components[criteria]] : [];
 
+	var components;
+	if(typeof criteria === 'function') {
+		components = this._queryComponents(criteria);		
+	} else if (typeof criteria === 'string') {
+		components = criteria in this._components ? [this._components[criteria]] : [];
+	} else {
+		components = this._metadataSearch.find(criteria);
+	}
+	
 	return recurse
 		? components.concat(this._parent.findComponents(criteria))
 		: components;
 };
 
 Context.prototype.destroy = function() {
+	delete this._metadataSearch;
 	delete this._components;
 	return Base.prototype.destroy.apply(this, arguments);
 };

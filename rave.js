@@ -65,7 +65,7 @@ function addPackage(context, pkg) {
 		var wire = pkg.metadata.wire;
 		context = context.add(pkg.name + '@configuration', function() {
 			return wire;
-		})
+		});
 	}
 
 	return context;

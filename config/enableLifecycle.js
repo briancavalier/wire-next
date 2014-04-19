@@ -8,7 +8,7 @@ module.exports = function enableLifecycle(context) {
 	return Object.create(context, {
 		add: {
 			value: function(metadata, create, destroy) {
-				return runLifecycle.call(this, context, metadata, create, destroy)
+				return runLifecycle.call(this, context, metadata, create, destroy);
 			},
 			configurable: true, writable: true
 		},

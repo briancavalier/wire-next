@@ -1,4 +1,3 @@
-var prototype = require('../scope/prototype');
 var byRole = require('../query/role');
 var when = require('when');
 
@@ -16,7 +15,7 @@ module.exports = function enableFacetSupport(context) {
 					var connections = context.get(byRole('connection-manager'));
 					return when.join(instance, connections).spread(wrapFacet);
 				}
-			}
+			};
 		})
 		.add({ roles: { 'connection-manager': true }, scope: context },
 			function() {
@@ -35,5 +34,5 @@ function wrapFacet(facet, connections) {
 		var disconnect = facet.apply(this, arguments);
 		connections.push.apply(connections, disconnect);
 		return disconnect;
-	}
+	};
 }
